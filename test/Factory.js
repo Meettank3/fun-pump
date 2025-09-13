@@ -9,15 +9,18 @@ describe("Factory", function () {
     async function deployFactoryFixture() {
         // fetch Account's
         const [deployer, creator] = await ethers.getSigners();        
+        
         // fetch the contract
         const Factory = await ethers.getContractFactory("Factory");
+        
         // deploy the contract
         const factory = await Factory.deploy(Fee);
+        
         // create token
         const transaction = await factory.connect(creator).create("Dapp Uni","DAP", { value: Fee });
         await transaction.wait();
+        
         // get Token Address
-
         const tokenAddress = await factory.tokens(0);
         const token = await ethers.getContractAt("Token", tokenAddress);
 
@@ -60,6 +63,22 @@ describe("Factory", function () {
             const balance = await ethers.provider.getBalance(await factory.getAddress());
             expect(balance).to.equal(Fee);
         });
+
+        it("Sould create Sales", async ()=> {
+
+            const { factory, token, creator } = await loadFixture(deployFactoryFixture);
+            const count = await factory.totalTokens();
+
+            expect(count).to.be.equal(1);
+            const sale = await factory.getTokenSale(0);
+
+            expect(sale.token).to.be.equal(await token.getAddress());
+            expect(sale.creator).to.be.equal(creator.address);
+            expect(sale.sold).to.be.equal(0);
+            expect(sale.raised).to.be.equal(0);
+            expect(sale.isOpen).to.be.equal(true);
+        });
+
     });
 
 });
