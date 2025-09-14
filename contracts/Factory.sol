@@ -97,12 +97,30 @@ contract Factory {
             sale.isOpen = false;
         }
 
-
         //transfer
         Token(_token).transfer(msg.sender, _amount);
 
         // emit event
         emit Buy(_token, _amount);
+    }
+
+    function deposite(address _token) external {
+        // the remaning token balance and ETH raised
+        //would go into liquidity pool like UniSwap V3
+        // for simplicity we will just transfre the remaning
+        //tokens and ETH raised to the creator
+
+        Token token = Token(_token);
+        TokenSale memory sale = tokenToSales[_token];
+
+        require(sale.isOpen == false, "Factory: Target not Reached yet");
+        
+        // transfer token to its creator
+        token.transfer(sale.creator, token.balanceOf(address(this)));
+
+        // transfer ETH raised
+        (bool sucess, ) = payable(sale.creator).call{value: sale.raised}("");
+        require(sucess,"Factory: Eth transfer failed");
     }
 
 }

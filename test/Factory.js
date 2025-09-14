@@ -122,6 +122,28 @@ describe("Factory", function () {
             const cost = await factory.getCost(sale.sold)
             expect(cost).to.be.equal(ethers.parseUnits("0.0002")) // it increase cost by 0.0001 after every sales of that token
         })
+    });
+
+    describe("Depositing", function () {
+        const AMOUNT = ethers.parseUnits("10000", 18)
+        const COST = ethers.parseUnits("2", 18)
+    
+        it("Sale should be closed and successfully deposits", async function () {
+
+            const { factory, token, creator, buyer } = await loadFixture(buyTokenFixture);
+          // Buy tokens again to reach target
+        const buyTx = await factory.connect(buyer).buy(await token.getAddress(), AMOUNT, { value: COST });
+        await buyTx.wait();
+    
+        const sale = await factory.tokenToSales(await token.getAddress());
+        expect(sale.isOpen).to.equal(false);
+    
+        const depositTx = await factory.connect(creator).deposite(await token.getAddress());
+        await depositTx.wait();
+    
+        const balance = await token.balanceOf(creator.address);
+        expect(balance).to.equal(ethers.parseUnits("980000", 18));
+        })
     })
 
 });
