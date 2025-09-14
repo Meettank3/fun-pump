@@ -8,7 +8,7 @@ describe("Factory", function () {
     // this function deploy the contract and returns the contract instance as factory
     async function deployFactoryFixture() {
         // fetch Account's
-        const [deployer, creator] = await ethers.getSigners();        
+        const [deployer, creator, buyer] = await ethers.getSigners();        
         
         // fetch the contract
         const Factory = await ethers.getContractFactory("Factory");
@@ -24,9 +24,19 @@ describe("Factory", function () {
         const tokenAddress = await factory.tokens(0);
         const token = await ethers.getContractAt("Token", tokenAddress);
 
-        return { factory, token, deployer, creator }; //this line is to export variables
+        return { factory, token, deployer, creator, buyer }; //this line is to export variables
     }   //to use its return var we must use line below
         // const { factory, deployer, creator } = await loadFixture(deployFactoryFixture)
+
+        async function buyTokenFixture() {
+            const { factory, token, deployer, creator, buyer } = await loadFixture(deployFactoryFixture);
+            const AMOUNT = ethers.parseUnits("10000",18);
+            const COST = ethers.parseUnits("1",18);
+            const transaction = await factory.connect(buyer).buy( await token.getAddress() ,AMOUNT, {value: COST });
+            await transaction.wait();
+            //expect().to.be.equal(buyer);
+            return { factory, token, deployer, creator, buyer };
+        }
 
     describe("Deployment", function() {
         it("Should have immutabe value", async() => {
@@ -80,6 +90,32 @@ describe("Factory", function () {
         });
 
     });
+
+    describe("Buying", function () {
+
+        const AMOUNT = ethers.parseUnits("10000",18);
+        const COST = ethers.parseUnits("1",18);
+
+        it("Check contract recive ETH", async () => {
+            const { factory, token, deployer, creator, buyer } = await buyTokenFixture();
+            const balance = await ethers.provider.getBalance(await factory.getAddress()); // to check balance of contract
+            expect(balance).to.be.equal( Fee + COST );
+        });
+
+        it("Check buyer recived Token", async () =>{
+            const { factory, token, deployer, creator, buyer } = await buyTokenFixture();
+            const balance = await token.balanceOf(buyer.address);
+            expect(balance).to.equal(AMOUNT);
+        });
+
+        it("Should update Token Sale", async () => {
+            const { factory, token } = await buyTokenFixture();
+            const sale = await factory.tokenToSales( await token.getAddress());
+            expect(sale.sold).to.equal(AMOUNT);
+            const  cost = await factory.getCost(sale.sold);
+            expect(sale.raised).to.equal(COST);
+        });
+    })
 
 });
 

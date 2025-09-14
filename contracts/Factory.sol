@@ -14,6 +14,7 @@ contract Factory {
 
 
     event Created(address indexed token);
+    event Buy(address indexed token, uint256 amount);
 
     struct TokenSale{
         address token;
@@ -59,6 +60,36 @@ contract Factory {
         tokenToSales[address(token)] = sale; // this is stored on Blockchain
 
         emit Created(address(token));
+    }
+
+    function getCost(uint256 _sold) public pure returns (uint256) {
+        uint256 floor = 0.0001 ether;
+        uint256 steps = 0.0001 ether;
+        uint256 increment = 10000 ether;
+
+        uint256 cost = (steps * (_sold / increment) ) + floor;
+        return cost;
+    }
+
+    function buy( address _token ,uint256 _amount)external payable {
+        TokenSale storage sale = tokenToSales[_token];
+        // check the condi
+
+        // calculate price of 1 token as per based on total broughtup
+        uint256 cost = getCost(sale.sold);
+        uint256 price = cost * (_amount / 10 ** 18);
+
+        // update sale
+        sale.sold += _amount;
+        sale.raised += price;
+
+        // make sure fund raising goal isnt met
+
+        //transfer
+        Token(_token).transfer(msg.sender, _amount);
+
+        // emit event
+        emit Buy(_token, _amount);
     }
 
 }
