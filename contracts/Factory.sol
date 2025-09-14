@@ -123,4 +123,11 @@ contract Factory {
         require(sucess,"Factory: Eth transfer failed");
     }
 
+    function withdraw(uint256 _amount) external {
+        require(msg.sender == owner, "Factory: Only Owner");
+        (bool sucess,) =payable(owner).call{value: _amount}("");
+        require(sucess,"Factory: Withdraw Failed");
+
+    }
+
 }
