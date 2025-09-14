@@ -5,6 +5,9 @@ import {Token} from "./Token.sol";
 
 contract Factory {
 
+    uint256 public constant TARGET = 3 ether;
+    uint256 public TOKEN_LIMIT = 500_000 ether;
+
     uint256 public immutable fee;
     address public owner;
 
@@ -73,7 +76,11 @@ contract Factory {
 
     function buy( address _token ,uint256 _amount)external payable {
         TokenSale storage sale = tokenToSales[_token];
+
         // check the condi
+        require(sale.isOpen == true, "Factory: Sale is not Open for this Token Yet");
+        require(_amount >= 1 ether,"Factory: Amount is too Low");
+        require(_amount <= 10000 ether, "Factory: Amount is too High");
 
         // calculate price of 1 token as per based on total broughtup
         uint256 cost = getCost(sale.sold);
@@ -84,6 +91,12 @@ contract Factory {
         sale.raised += price;
 
         // make sure fund raising goal isnt met
+        require(msg.value >= price, "Factory: Insuffient ETH recived");
+        
+        if(sale.sold >= TOKEN_LIMIT || sale.raised >= TARGET){
+            sale.isOpen = false;
+        }
+
 
         //transfer
         Token(_token).transfer(msg.sender, _amount);

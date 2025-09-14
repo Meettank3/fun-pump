@@ -108,13 +108,20 @@ describe("Factory", function () {
             expect(balance).to.equal(AMOUNT);
         });
 
-        it("Should update Token Sale", async () => {
-            const { factory, token } = await buyTokenFixture();
-            const sale = await factory.tokenToSales( await token.getAddress());
-            expect(sale.sold).to.equal(AMOUNT);
-            const  cost = await factory.getCost(sale.sold);
-            expect(sale.raised).to.equal(COST);
-        });
+        it("Should update token sale", async function () {
+            const { factory, token } = await loadFixture(buyTokenFixture)
+            const sale = await factory.tokenToSales(await token.getAddress())
+            expect(sale.sold).to.equal(AMOUNT)
+            expect(sale.raised).to.equal(COST)
+            expect(sale.isOpen).to.equal(true)
+        })
+
+        it("Should increase base cost", async function () {
+            const { factory, token } = await loadFixture(buyTokenFixture)
+            const sale = await factory.tokenToSales(await token.getAddress())
+            const cost = await factory.getCost(sale.sold)
+            expect(cost).to.be.equal(ethers.parseUnits("0.0002")) // it increase cost by 0.0001 after every sales of that token
+        })
     })
 
 });
