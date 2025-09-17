@@ -5,6 +5,8 @@ import config from "./config.json";
 
 // Components
 import Header from "./components/Header";
+import Token from "./components/Token";
+import images from "./images.json";
 
 // ABIs & Config
 import Factory from "./abis/Factory.json";
@@ -15,6 +17,7 @@ export default function Home() {
   const [account, setAccount] = useState(null);
   const [factory, setFactory] = useState(null);
   const [fee, setFee] = useState(0);
+  const [token, setToken] = useState([]);
   const [showCreate, setShowCreate] = useState(null);
 
   function toggleCreate() {
@@ -33,6 +36,33 @@ export default function Home() {
 
     const fee = await factory.fee();
     setFee(fee);
+
+    const totalTokens = await factory.totalTokens();
+    const tokens = [];
+
+    for(let i = 0; i < totalTokens; i++){
+      if(i ==6 ){
+        break;
+      }
+
+      const tokenSale = await factory.getTokenSale(i);
+
+      const token = {
+        token: tokenSale.token,
+        name: tokenSale.name,
+        creator: tokenSale.creator,
+        sold: tokenSale.sold,
+        raised: tokenSale.raised,
+        isOpen: tokenSale.isOpen,
+        image: images[i],
+      }
+
+      tokens.push(token);
+    }
+
+    setToken(tokens.reverse());
+    console.log(tokens);
+
   }
 
   useEffect( () => {
@@ -56,6 +86,28 @@ export default function Home() {
           )}
           </button>
         </div>
+
+          <div className="listings">
+
+              <h1> New Listings </h1>
+
+              <div className="tokens">
+                {!account ? (
+                  <p>Please Connect Wallet</p>
+                ) : token.length === 0 ? (
+                  <p>No Tokens Listed</p>
+                ) : (
+                  token.map((token, index) => (
+                    <Token 
+                    toggleTrade={()=>{}}
+                    token={token}
+                    key={index}
+                    />
+                  ))
+                )}
+              </div>
+          </div>
+
       </main>
     {
       showCreate && 
