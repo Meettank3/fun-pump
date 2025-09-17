@@ -1,6 +1,7 @@
 "use client"
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
+import config from "./config.json";
 
 // Components
 import Header from "./components/Header";
@@ -13,14 +14,17 @@ export default function Home() {
 
 
   async function loadBlockchainData() {
+    //if (typeof window === "undefined") return; // ✅ prevent SSR mismatch
     const provider = new ethers.BrowserProvider(window.ethereum);
     setProvider(provider);
-    console.log(provider);
+
+    const network = await provider.getNetwork();    
+    console.log(config[network.chainId].factory.address);    
   }
 
   useEffect( () => {
     loadBlockchainData();
-  }, []) ;
+  }, []);
 
   return (
     <div className="page">
