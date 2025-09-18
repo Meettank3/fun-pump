@@ -6,6 +6,25 @@ function Trade({ toggleTrade, token, provider, factory }) {
   const [target, setTarget] = useState(0);
   const [limit, setLimit] = useState(0);
   const [cost, setCost] = useState(0);
+
+  async function buyHandler(form){
+    const amount =form.get("amount");
+    
+    const cost = await factory.getCost(token.sold);
+    const totalcost = cost * BigInt(amount);
+
+    const signer = await provider.getSigner();
+
+    const transaction = await factory.connect(signer).buy(
+      token.token,
+      ethers.parseUnits(amount, 18),
+      {value: totalcost}
+    );
+
+    await transaction.wait()
+    console.log("Trans", transaction);
+    toggleTrade();
+  }
   
   async function getSaleDetails(){
     const target = await factory.TARGET();
@@ -33,8 +52,18 @@ function Trade({ toggleTrade, token, provider, factory }) {
       <img src={token.image} alt="token image" width={256} height={256} />
       <p>Market Cap {ethers.formatUnits(token.raised, 18)} ETH</p>
       </div>
-
       <p>base cost: {ethers.formatUnits(cost,18)} ETH</p>
+
+      { token.sold >= limit || token.raised >= target ?(
+        <p className="disclaimer"> Target Reached...! </p>
+      ) : (
+        <form action={buyHandler}>
+          <input type="number" name="amount" min={1} max={10000} placeholder="1"></input>
+          <input type="submit" value="[ buy ]"></input>
+        </form>
+      )
+      }
+
       <button onClick={toggleTrade} className="btn--fancy">[Cancle]</button>
       
 
