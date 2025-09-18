@@ -11,6 +11,7 @@ import images from "./images.json";
 // ABIs & Config
 import Factory from "./abis/Factory.json";
 import List from "./components/List";
+import Trade from "./components/Trade";
 
 export default function Home() {
   const [provider, setProvider] = useState(null);
@@ -18,14 +19,20 @@ export default function Home() {
   const [factory, setFactory] = useState(null);
   const [fee, setFee] = useState(0);
   const [token, setToken] = useState([]);
+  const [tokens, setTokens] = useState([]);
   const [showCreate, setShowCreate] = useState(null);
+  const [showTrad,setShowTrade] = useState(false);
 
   function toggleCreate() {
     showCreate ? setShowCreate(false) : setShowCreate(true);
   }
 
+  function toggleTrade(token) {
+    setTokens(token);
+    showTrad ? setShowTrade(false) : setShowTrade(true);
+  }
+
   async function loadBlockchainData() {
-    //if (typeof window === "undefined") return; // ✅ prevent SSR mismatch
     const provider = new ethers.BrowserProvider(window.ethereum);
     setProvider(provider);
 
@@ -99,7 +106,7 @@ export default function Home() {
                 ) : (
                   token.map((token, index) => (
                     <Token 
-                    toggleTrade={()=>{}}
+                    toggleTrade={toggleTrade}
                     token={token}
                     key={index}
                     />
@@ -116,6 +123,10 @@ export default function Home() {
       )
     }
       
+
+      {showTrad && (
+        <Trade toggleTrade={toggleTrade} token={tokens} provider={provider} factory={factory} />
+      )}
 
     </div>
   );
