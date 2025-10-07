@@ -13,7 +13,7 @@ import Factory from "./abis/Factory.json";
 import List from "./components/List";
 import Trade from "./components/Trade";
 
-export default function Home() {
+export default function Home() {  
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
   const [factory, setFactory] = useState(null);
@@ -73,8 +73,11 @@ export default function Home() {
   }
 
   useEffect( () => {
-    loadBlockchainData();
-  }, []);
+    if(account)
+    {
+      loadBlockchainData();
+    }
+  }, [account]);
 
   return (
     <div className="page">
@@ -119,13 +122,13 @@ export default function Home() {
     {
       showCreate && 
       ( 
-        <List toggleCreate={toggleCreate}  fee={fee} provider={provider} factory={factory} /> 
+        <List toggleCreate={toggleCreate}  fee={fee} provider={provider} factory={factory} reloadTokens={loadBlockchainData} /> 
       )
     }
       
 
       {showTrad && (
-        <Trade toggleTrade={toggleTrade} token={tokens} provider={provider} factory={factory} />
+        <Trade toggleTrade={toggleTrade} token={tokens} provider={provider} factory={factory} reloadTokens={loadBlockchainData} />
       )}
 
     </div>

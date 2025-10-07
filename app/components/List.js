@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-function List({ toggleCreate, fee, provider, factory }) {
+function List({ toggleCreate, fee, provider, factory , reloadTokens}) {
 
   async function listHandler(form) {
     //preventDefault(); // ✅ prevent page reload
@@ -13,6 +13,8 @@ function List({ toggleCreate, fee, provider, factory }) {
     const transaction = await factory.connect(signer).create(name, ticker, { value: fee });
     await transaction.wait();
     toggleCreate();
+    reloadTokens();
+
   }
 
   return (

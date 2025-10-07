@@ -2,12 +2,12 @@ import { ethers } from "ethers";
 import { useEffect, useState } from 'react';
 
 
-function Trade({ toggleTrade, token, provider, factory }) {
+function Trade({ toggleTrade, token, provider, factory, reloadTokens }) {
   const [target, setTarget] = useState(0);
   const [limit, setLimit] = useState(0);
   const [cost, setCost] = useState(0);
 
-  async function buyHandler(form){
+  async function buyHandler(form){    
     const amount =form.get("amount");
     
     const cost = await factory.getCost(token.sold);
@@ -24,6 +24,8 @@ function Trade({ toggleTrade, token, provider, factory }) {
     await transaction.wait()
     console.log("Trans", transaction);
     toggleTrade();
+    reloadTokens();
+
   }
   
   async function getSaleDetails(){
