@@ -1,14 +1,15 @@
 const hre = require("hardhat");
 
 async function main() {
-  const fee = hre.ethers.parseEther("0.001");
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("Deploying with account:", deployer.address);
 
   const Factory = await hre.ethers.getContractFactory("Factory");
-  const factory = await Factory.deploy(fee);
-
+  const factory = await Factory.deploy(1000); // pass constructor args here
   await factory.waitForDeployment();
 
-  console.log(`Factory deployed to ${factory.target}`);
+  const factoryAddress = await factory.getAddress(); // ✅ must await here
+  console.log("✅ Factory deployed at:", factoryAddress );
 }
 
 main().catch((error) => {

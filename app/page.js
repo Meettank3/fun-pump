@@ -1,7 +1,6 @@
 "use client"
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import config from "./config.json";
 
 // Components
 import Header from "./components/Header";
@@ -12,6 +11,7 @@ import images from "./images.json";
 import Factory from "./abis/Factory.json";
 import List from "./components/List";
 import Trade from "./components/Trade";
+
 
 export default function Home() {  
   const [provider, setProvider] = useState(null);
@@ -36,12 +36,17 @@ export default function Home() {
     const provider = new ethers.BrowserProvider(window.ethereum);
     setProvider(provider);
 
-    const network = await provider.getNetwork();    
+    const factoryAddress = process.env.NEXT_PUBLIC_FACTORY_ADDRESS;
 
-    const factory = new ethers.Contract(config[network.chainId].factory.address, Factory, provider);
-    setFactory(factory);
+    if (!factoryAddress) {
+      console.error("Factory address not defined in .env");
+      return;
+    }
 
+
+    const factory = new ethers.Contract(factoryAddress, Factory, provider);
     const fee = await factory.fee();
+    setFactory(factory);
     setFee(fee);
 
     const totalTokens = await factory.totalTokens();
